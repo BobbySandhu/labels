@@ -22,7 +22,8 @@
         <activity android:name=".ui.activity.IntroSliderActivity"
                   android:theme="@style/AppThemeFullScreen"/>
 
-        <activity android:name=".MainActivity"/>
+        <activity android:name=".MainActivity"
+                  android:theme="@style/AppThemeNoActionBar"/>
     </application>
 
 </manifest>
