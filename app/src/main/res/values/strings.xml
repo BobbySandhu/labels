@@ -6,4 +6,5 @@
     <string name="company_logo">Company logo</string>
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
+    <string name="heading_task_available">Tasks available for you</string>
 </resources>

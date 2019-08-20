@@ -22,4 +22,9 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
+    <style name="TextHeading">
+        <item name="android:textSize">@dimen/_12ssp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
 </resources>
