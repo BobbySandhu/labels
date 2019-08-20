@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Labels</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="company_logo">Company logo</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
+    <string name="heading_task_available">Tasks available for you</string>
 </resources>
