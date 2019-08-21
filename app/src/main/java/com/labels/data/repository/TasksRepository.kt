@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import com.google.gson.GsonBuilder
 import com.labels.http.ApiInterface
 import com.labels.model.Task
+import com.labels.model.details.TaskDetailResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -36,5 +37,21 @@ class TasksRepository {
         })
 
         return tasksLiveData
+    }
+
+    fun getTaskDetail(): LiveData<ArrayList<TaskDetailResponse>> {
+        val taskDetailLiveData = MutableLiveData<ArrayList<TaskDetailResponse>>()
+        webservice.getTaskDetail().enqueue(object: Callback<ArrayList<TaskDetailResponse>> {
+            override fun onFailure(call: Call<ArrayList<TaskDetailResponse>>, t: Throwable) {
+                Log.d("aaa", t.toString())
+            }
+
+            override fun onResponse(call: Call<ArrayList<TaskDetailResponse>>, response: Response<ArrayList<TaskDetailResponse>>) {
+                taskDetailLiveData.value = response.body()
+                Log.d("aaa", response.toString())
+            }
+        })
+
+        return taskDetailLiveData
     }
 }
