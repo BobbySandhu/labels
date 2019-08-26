@@ -7,6 +7,8 @@ import com.google.gson.GsonBuilder
 import com.labels.http.ApiInterface
 import com.labels.model.Task
 import com.labels.model.details.TaskDetailResponse
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -16,9 +18,15 @@ import retrofit2.converter.gson.GsonConverterFactory
 class TasksRepository {
 
     private val webservice by lazy {
+        val interceptor = HttpLoggingInterceptor()
+        val client = OkHttpClient().newBuilder().addInterceptor(interceptor).build()
+        interceptor.level = HttpLoggingInterceptor.Level.BODY
+
         Retrofit.Builder()
-            .baseUrl("https://ci.edelmansp.co.in/")
+            //.baseUrl("https://ci.edelmansp.co.in/")
+            .baseUrl("http://54.243.149.109:7000/")
             .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
+            .client(client)
             .build().create(ApiInterface::class.java)
     }
 
