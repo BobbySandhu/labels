@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.RadioButton
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.labels.R
 import com.labels.model.details.TaskDetailResponse
@@ -19,7 +18,7 @@ class TaskDetailAdapter(val taskDetail: ArrayList<TaskDetailResponse>)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private lateinit var context: Context
-    private val allAnswerMap: HashMap<Int, HashMap<Int, Any>> = HashMap()
+    private val allAnswerMap: HashMap<Int, Any> = HashMap()
 
     companion object {
         const val TYPE_IMAGE = "image"
@@ -106,7 +105,12 @@ class TaskDetailAdapter(val taskDetail: ArrayList<TaskDetailResponse>)
 
 
                 radioGroup.setOnCheckedChangeListener { group, checkedId ->
-                    //allAnswerMap.put(position)
+                    radioButtonArray.forEachIndexed { index, i ->
+
+                        if (checkedId == radioButtonArray[index]) {
+                            allAnswerMap[taskDetail.id] = taskDetail.options[index].id
+                        }
+                    }
                 }
             }
         }
@@ -114,18 +118,32 @@ class TaskDetailAdapter(val taskDetail: ArrayList<TaskDetailResponse>)
 
     inner class McqCheckboxHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        val question = itemView.text_mcq_checkbox
-        val linearLayoutCheckbox = itemView.linear_layout_checkboxes
+        private val question = itemView.text_mcq_checkbox
+        private val linearLayoutCheckbox = itemView.linear_layout_checkboxes
+        private var multipleOptions = arrayListOf<Int>()
+        private lateinit var checkBoxIdsArray: IntArray
 
         fun setData(taskDetail: TaskDetailResponse, position: Int) {
             question.text = taskDetail.question
 
             if (taskDetail.options != null && taskDetail.options.size > 0) {
-                for (option in taskDetail.options) {
+                checkBoxIdsArray = IntArray(taskDetail.options.size)
+
+                taskDetail.options.forEachIndexed { index, option ->
                     val checkBox = CheckBox(context)
                     checkBox.text = option.opt
+                    checkBox.id = index + 1000
+                    checkBoxIdsArray[index] = checkBox.id
+
                     checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
-                        Toast.makeText(context, "you have selected " + option.opt, Toast.LENGTH_SHORT).show()
+                        checkBoxIdsArray.forEachIndexed { index, i ->
+                            if (buttonView.id == checkBoxIdsArray[index]) {
+                                if (isChecked) multipleOptions.add(taskDetail.options[index].id)
+                                else multipleOptions.remove(taskDetail.options[index].id)
+
+                                allAnswerMap[taskDetail.id] = multipleOptions
+                            }
+                        }
                     }
 
                     linearLayoutCheckbox.addView(checkBox)
