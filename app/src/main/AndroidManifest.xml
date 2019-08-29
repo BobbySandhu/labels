@@ -4,6 +4,7 @@
     package="com.labels">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:allowBackup="false"
@@ -12,10 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        tools:ignore="GoogleAppIndexingWarning">
 
-        <activity android:name=".ui.fragments.detail.TaskDetailsActivity" />
         <activity
             android:name=".ui.activity.SplashActivity"
             android:theme="@style/AppThemeFullScreen">
@@ -31,6 +31,7 @@
         <activity
             android:name=".MainActivity"
             android:theme="@style/AppThemeNoActionBar" />
+        <activity android:name="com.labels.ui.activity.TaskDetailsActivity" />
     </application>
 
 </manifest>

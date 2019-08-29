@@ -28,5 +28,13 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_5sdp" />
 
+        <Button
+            android:id="@+id/button_add_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add Image"
+            android:layout_marginTop="@dimen/_5sdp"
+            android:textAllCaps="false"/>
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>

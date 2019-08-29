@@ -62,4 +62,20 @@ class TasksRepository {
 
         return taskDetailLiveData
     }
+
+    fun sendAnswers(answerJson: String): LiveData<String> {
+        val answerResponseLiveData = MutableLiveData<String>()
+        webservice.sendAnswers(answerJson).enqueue(object: Callback<String> {
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                Log.d("aaa", t.toString())
+            }
+
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                answerResponseLiveData.value = response.body()
+                Log.d("aaa", response.toString())
+            }
+        })
+
+        return answerResponseLiveData
+    }
 }
