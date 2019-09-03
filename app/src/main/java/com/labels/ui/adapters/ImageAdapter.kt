@@ -1,6 +1,7 @@
 package com.labels.ui.adapters
 
 import android.content.Context
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,8 +9,8 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.labels.R
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.item_task_image.view.*
 import kotlinx.android.synthetic.main.item_task_image_image.view.*
+import java.io.File
 
 class ImageAdapter(val imageUrls: ArrayList<String>) : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
 
@@ -36,16 +37,12 @@ class ImageAdapter(val imageUrls: ArrayList<String>) : RecyclerView.Adapter<Imag
 
         fun setData(imageUrl: String, position: Int) {
 
-            /*if (imageUrl == "image_close")
-                Picasso.get().load(R.drawable.ic_add).into(image)
-            else */
-            Picasso.get().load(imageUrl).into(image)
+            var file  = File(imageUrl)
+            Picasso.get().load(file).into(image)
 
             imageRemove.setOnClickListener {
                 Toast.makeText(context, "clicked $position", Toast.LENGTH_SHORT).show()
             }
-
-
         }
     }
 }
