@@ -6,142 +6,119 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
-import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
 
 import androidx.appcompat.widget.AppCompatImageView;
 
-public class DragRectView extends AppCompatImageView {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+public class DragRectView extends AppCompatImageView implements View.OnTouchListener {
+
+    protected Matrix matrix;
     private Paint mRectPaint;
-
-    private int mStartX = 0;
-    private int mStartY = 0;
-    private int mEndX = 0;
-    private int mEndY = 0;
-    private boolean mDrawRect = false;
-    private TextPaint mTextPaint = null;
-
-    private OnUpCallback mCallback = null;
     private Canvas canvas;
-    private Matrix matrix;
+    //
+    private int count = 1;
+    private int touchX;
+    private int touchY;
+    private ArrayList<Point> points = new ArrayList<>();
+    private HashMap<Integer, ArrayList<Point>> rectMap = new HashMap<>();
+    private ArrayList<Rect> rects = new ArrayList();
 
     public DragRectView(final Context context) {
         super(context);
-       // init();
+        setOnTouchListener(this);
     }
 
     public DragRectView(final Context context, final AttributeSet attrs) {
         super(context, attrs);
-        //init();
+        setOnTouchListener(this);
     }
 
     public DragRectView(final Context context, final AttributeSet attrs, final int defStyle) {
         super(context, attrs, defStyle);
-        //init();
-    }
-
-    /**
-     * Sets callback for up
-     *
-     * @param callback {@link OnUpCallback}
-     */
-    public void setOnUpCallback(OnUpCallback callback) {
-        mCallback = callback;
-    }
-
-    /**
-     * Inits internal data
-     */
-    /*private void init() {
-        mRectPaint = new Paint();
-        //mRectPaint.setColor(getContext().getResources().getColor(android.R.color.holo_green_light));
-        mRectPaint.setStyle(Paint.Style.STROKE);
-        //mRectPaint.setStrokeWidth(5); // TODO: should take from resources
-
-        mTextPaint = new TextPaint();
-        mTextPaint.setColor(getContext().getResources().getColor(android.R.color.holo_green_light));
-        mTextPaint.setTextSize(20);
-    }*/
-
-    public void setNewImage(Bitmap alteredBitmap, Bitmap bmp) {
-        canvas = new Canvas(alteredBitmap);
-        mRectPaint = new Paint();
-        mRectPaint.setColor(Color.GREEN);
-        mRectPaint.setStrokeWidth(5);
-        matrix = new Matrix();
-        canvas.drawBitmap(bmp, matrix, mRectPaint);
-
-
-        //mRectPaint = new Paint();
-        //mRectPaint.setColor(getContext().getResources().getColor(android.R.color.holo_green_light));
-        mRectPaint.setStyle(Paint.Style.STROKE);
-        //mRectPaint.setStrokeWidth(5); // TODO: should take from resources
-
-        mTextPaint = new TextPaint();
-        mTextPaint.setColor(getContext().getResources().getColor(android.R.color.holo_green_light));
-        mTextPaint.setTextSize(20);
-
-        setImageBitmap(alteredBitmap);
+        setOnTouchListener(this);
     }
 
     @Override
-    public boolean onTouchEvent(final MotionEvent event) {
+    public boolean onTouch(View v, MotionEvent event) {
 
-        // TODO: be aware of multi-touches
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                mDrawRect = false;
-                mStartX = (int) event.getX();
-                mStartY = (int) event.getY();
-                //invalidate();
-                break;
-
-            case MotionEvent.ACTION_MOVE:
-                final int x = (int) event.getX();
-                final int y = (int) event.getY();
-
-                if (/*!mDrawRect ||*/ Math.abs(x - mEndX) > 5 || Math.abs(y - mEndY) > 5) {
-                    mEndX = x;
-                    mEndY = y;
-
-                    invalidate();
-                }
-
-                mDrawRect = true;
-                break;
-
-            case MotionEvent.ACTION_UP:
-                if (mCallback != null) {
-                    mCallback.onRectFinished(new Rect(Math.min(mStartX, mEndX), Math.min(mStartY, mEndY),
-                            Math.max(mEndX, mStartX), Math.max(mStartY, mEndY)));
-                }
-
-                invalidate();
-                break;
-
-            default:
-                break;
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            Point point = new Point();
+            //touchX = (int) event.getX();
+            touchX = (int) getPointerCoords(event)[0];
+            //touchY = (int) event.getY();
+            touchY = (int) getPointerCoords(event)[1];
+            point.set(touchX, touchY);
+            points.add(point);
         }
+
+        if (points.size() != 0 && points.size() == 2) {
+            //rectMap.put(count, points);
+
+            int xs = points.get(0).x;
+            int ys = points.get(0).y;
+            int xe = points.get(1).x;
+            int ye = points.get(1).y;
+
+            rects.add(new Rect(xs, ys, xe, ye));
+            count++;
+            points.clear();
+        }
+
+        invalidate();
 
         return true;
     }
 
     @Override
-    protected void onDraw(final Canvas canvas) {
+    protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (mDrawRect) {
-            canvas.drawRect(Math.min(mStartX, mEndX), Math.min(mStartY, mEndY),
-                    Math.max(mEndX, mStartX), Math.max(mEndY, mStartY), mRectPaint);
-//            canvas.drawText("  (" + Math.abs(mStartX - mEndX) + ", " + Math.abs(mStartY - mEndY) + ")",
-//                    Math.max(mEndX, mStartX), Math.max(mEndY, mStartY), mTextPaint);
+        drawRectangle();
+    }
+
+    public void setNewImage(Bitmap alteredBitmap, Bitmap bmp) {
+        canvas = new Canvas(alteredBitmap);
+        mRectPaint = new Paint();
+        mRectPaint.setColor(Color.RED);
+        mRectPaint.setStrokeWidth(5);
+        mRectPaint.setStyle(Paint.Style.STROKE);
+        matrix = new Matrix();
+        //canvas.drawBitmap(bmp, new Rect(0, 0, bmp.getWidth(), bmp.getHeight(), ), mRectPaint);
+        canvas.drawBitmap(bmp, matrix, mRectPaint);
+
+        setImageBitmap(alteredBitmap);
+    }
+
+    private void drawRectanglee(int xs, int ys, int xe, int ye, /*Canvas canvas,*/ Paint paint) {
+        float left = xs > xe ? xe : xs;
+        float top = ys > ye ? ye : ys;
+        float right = xs > xe ? xs : xe;
+        float bottom = ys > ye ? ys : ye;
+        canvas.drawRect(left, top, right, bottom, paint);
+    }
+
+    private void drawRectangle() {
+        for (int i = 0; i < rects.size(); i++) {
+            canvas.drawRect(rects.get(i), mRectPaint);
         }
     }
 
-    public interface OnUpCallback {
-        void onRectFinished(Rect rect);
+    final float[] getPointerCoords(MotionEvent e) {
+        final int index = e.getActionIndex();
+        final float[] coords = new float[]{e.getX(index), e.getY(index)};
+        Matrix matrix = new Matrix();
+        getImageMatrix().invert(matrix);
+        matrix.postTranslate(getScrollX(), getScrollY());
+        matrix.mapPoints(coords);
+
+        return coords;
     }
 }

@@ -44,7 +44,7 @@ class EditImageActivity : AppCompatActivity() {
 
     private fun displayImageToEdit() {
         try {
-            val imageResolution = 800
+            val imageResolution = 1000
             val bmpFactoryOptions = BitmapFactory.Options()
             bmpFactoryOptions.inJustDecodeBounds = true
 

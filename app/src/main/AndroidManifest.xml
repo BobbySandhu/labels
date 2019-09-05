@@ -29,7 +29,7 @@
             </meta-data>
         </provider>
 
-        <activity
+        <!--<activity
             android:name=".ui.activity.SplashActivity"
             android:theme="@style/AppThemeFullScreen">
             <intent-filter>
@@ -37,13 +37,25 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>-->
+
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/AppThemeFullScreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
+
+
         <activity
             android:name=".ui.activity.IntroSliderActivity"
             android:theme="@style/AppThemeFullScreen" />
-        <activity
+        <!--<activity
             android:name=".MainActivity"
-            android:theme="@style/AppThemeNoActionBar" />
+            android:theme="@style/AppThemeNoActionBar" />-->
         <activity android:name=".ui.activity.TaskDetailsActivity" />
         <activity android:name=".ui.activity.EditImageActivity" />
     </application>

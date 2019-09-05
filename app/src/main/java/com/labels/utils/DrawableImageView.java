@@ -41,7 +41,7 @@ public class DrawableImageView extends AppCompatImageView implements View.OnTouc
     public void setNewImage(Bitmap alteredBitmap, Bitmap bmp) {
         canvas = new Canvas(alteredBitmap);
         paint = new Paint();
-        paint.setColor(Color.GREEN);
+        paint.setColor(Color.RED);
         paint.setStrokeWidth(5);
         matrix = new Matrix();
         canvas.drawBitmap(bmp, matrix, paint);
