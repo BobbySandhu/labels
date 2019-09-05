@@ -105,6 +105,9 @@ class EditImageActivity : AppCompatActivity() {
         }
     }
 
+    private fun undoMarking() {
+
+    }
 
     fun convertToMutable(imgIn: Bitmap): Bitmap {
         var imgIn = imgIn

@@ -9,12 +9,22 @@
         android:id="@+id/image_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_alignParentTop="true"
         android:layout_above="@id/button_upload"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
         android:layout_marginTop="@dimen/_5sdp"
         android:layout_marginBottom="@dimen/_5sdp"
         tools:src="@tools:sample/avatars" />
+
+    <ImageView
+        android:id="@+id/image_undo"
+        android:layout_width="@dimen/_50sdp"
+        android:layout_height="@dimen/_50sdp"
+        android:layout_above="@id/button_upload"
+        android:layout_alignParentEnd="true"
+        android:background="@color/colorAccent"
+        tools:src="@tools:sample/avatars"
+        tools:srcCompat="@drawable/ic_undo" />
 
     <Button
         android:id="@+id/button_upload"

@@ -20,11 +20,9 @@ import java.util.Map;
 
 public class DragRectView extends AppCompatImageView implements View.OnTouchListener {
 
-    protected Matrix matrix;
+    private Matrix matrix;
     private Paint mRectPaint;
     private Canvas canvas;
-    //
-    private int count = 1;
     private int touchX;
     private int touchY;
     private ArrayList<Point> points = new ArrayList<>();
@@ -60,7 +58,6 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
         }
 
         if (points.size() != 0 && points.size() == 2) {
-            //rectMap.put(count, points);
 
             int xs = points.get(0).x;
             int ys = points.get(0).y;
@@ -68,7 +65,6 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
             int ye = points.get(1).y;
 
             rects.add(new Rect(xs, ys, xe, ye));
-            count++;
             points.clear();
         }
 
@@ -91,18 +87,9 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
         mRectPaint.setStrokeWidth(5);
         mRectPaint.setStyle(Paint.Style.STROKE);
         matrix = new Matrix();
-        //canvas.drawBitmap(bmp, new Rect(0, 0, bmp.getWidth(), bmp.getHeight(), ), mRectPaint);
         canvas.drawBitmap(bmp, matrix, mRectPaint);
 
         setImageBitmap(alteredBitmap);
-    }
-
-    private void drawRectanglee(int xs, int ys, int xe, int ye, /*Canvas canvas,*/ Paint paint) {
-        float left = xs > xe ? xe : xs;
-        float top = ys > ye ? ye : ys;
-        float right = xs > xe ? xs : xe;
-        float bottom = ys > ye ? ys : ye;
-        canvas.drawRect(left, top, right, bottom, paint);
     }
 
     private void drawRectangle() {
