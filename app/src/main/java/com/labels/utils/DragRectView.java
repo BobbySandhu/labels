@@ -6,28 +6,36 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.appcompat.widget.AppCompatImageView;
 
+import com.labels.ui.activity.EditImageActivity;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DragRectView extends AppCompatImageView implements View.OnTouchListener {
+public class DragRectView extends AppCompatImageView implements View.OnTouchListener, EditImageActivity.UndoListener {
 
-    private Matrix matrix;
-    private Paint mRectPaint;
-    private Canvas canvas;
     private int touchX;
     private int touchY;
+    private Canvas canvas;
+    private Paint mRectPaint;
+    private Matrix matrix;
     private ArrayList<Point> points = new ArrayList<>();
-    private HashMap<Integer, ArrayList<Point>> rectMap = new HashMap<>();
     private ArrayList<Rect> rects = new ArrayList();
+
+    private Path mPath;
+    private ArrayList<Path> paths = new ArrayList<>();
+    private ArrayList<Path> undonePaths = new ArrayList<>();
 
     public DragRectView(final Context context) {
         super(context);
@@ -49,9 +57,7 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
 
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             Point point = new Point();
-            //touchX = (int) event.getX();
             touchX = (int) getPointerCoords(event)[0];
-            //touchY = (int) event.getY();
             touchY = (int) getPointerCoords(event)[1];
             point.set(touchX, touchY);
             points.add(point);
@@ -80,6 +86,14 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
         drawRectangle();
     }
 
+    @Override
+    public void onUndo() {
+        if (paths.size() > 0) {
+            undonePaths.add(paths.remove(paths.size() - 1));
+            invalidate();
+        }
+    }
+
     public void setNewImage(Bitmap alteredBitmap, Bitmap bmp) {
         canvas = new Canvas(alteredBitmap);
         mRectPaint = new Paint();
@@ -88,14 +102,19 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
         mRectPaint.setStyle(Paint.Style.STROKE);
         matrix = new Matrix();
         canvas.drawBitmap(bmp, matrix, mRectPaint);
+        mPath = new Path();
 
         setImageBitmap(alteredBitmap);
     }
 
     private void drawRectangle() {
-        for (int i = 0; i < rects.size(); i++) {
-            canvas.drawRect(rects.get(i), mRectPaint);
-        }
+//        for (int i = 0; i < rects.size(); i++) {
+//            canvas.drawRect(rects.get(i), mRectPaint);
+//        }
+
+        /* Drawing only recently added rectangle */
+        if (!rects.isEmpty())
+            canvas.drawRect(rects.get(rects.size() - 1), mRectPaint);
     }
 
     final float[] getPointerCoords(MotionEvent e) {
@@ -107,5 +126,9 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
         matrix.mapPoints(coords);
 
         return coords;
+    }
+
+    public DragRectView getInstance() {
+        return this;
     }
 }

@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -15,10 +14,6 @@ import com.labels.utils.Constants
 import com.labels.utils.Utils
 import kotlinx.android.synthetic.main.activity_edit_image.*
 import java.io.File
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.io.RandomAccessFile
-import java.nio.channels.FileChannel
 
 class EditImageActivity : AppCompatActivity() {
 
@@ -26,6 +21,7 @@ class EditImageActivity : AppCompatActivity() {
     private var bmp: Bitmap? = null
     private var alteredBitmap: Bitmap? = null
     private var imageFileUri: Uri? = null
+    private var mUndoListener: UndoListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,10 +29,11 @@ class EditImageActivity : AppCompatActivity() {
 
         getIntentData()
         setSaveButtonListener()
+        setUndoButtonListener()
     }
 
     private fun getIntentData() {
-        imagePath = intent.getStringExtra("captured_image")
+        imagePath = intent.getStringExtra("captured_image") //TODO extract constant
 
         displayImageToEdit()
     }
@@ -67,10 +64,8 @@ class EditImageActivity : AppCompatActivity() {
             alteredBitmap = Utils.getResizedBitmap(bmp, imageResolution)
             bmp = Utils.getResizedBitmap(bmp, imageResolution)
 
-            //if (!alteredBitmap.isMutable())
-            //   alteredBitmap = convertToMutable(alteredBitmap)
-
             image_edit.setNewImage(alteredBitmap, bmp)
+            mUndoListener = image_edit.instance
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -105,40 +100,13 @@ class EditImageActivity : AppCompatActivity() {
         }
     }
 
-    private fun undoMarking() {
-
+    private fun setUndoButtonListener() {
+        image_undo.setOnClickListener {
+            mUndoListener?.onUndo()
+        }
     }
 
-    fun convertToMutable(imgIn: Bitmap): Bitmap {
-        var imgIn = imgIn
-        try {
-            val file = File(Environment.getExternalStorageDirectory().toString() + File.separator + "temp.tmp")
-            val randomAccessFile = RandomAccessFile(file, "rw")
-
-            val width = imgIn.width
-            val height = imgIn.height
-            val type = imgIn.config
-
-            val channel = randomAccessFile.getChannel()
-            val map = channel.map(FileChannel.MapMode.READ_WRITE, 0, (imgIn.rowBytes * height).toLong())
-            imgIn.copyPixelsToBuffer(map)
-
-            System.gc()
-
-            imgIn = Bitmap.createBitmap(width, height, type)
-            map.position(0)
-            imgIn.copyPixelsFromBuffer(map)
-            channel.close()
-            randomAccessFile.close()
-
-            file.delete()
-
-        } catch (e: FileNotFoundException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
-        return imgIn
+    interface UndoListener {
+        fun onUndo()
     }
 }

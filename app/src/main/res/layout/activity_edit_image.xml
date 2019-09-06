@@ -24,6 +24,7 @@
         android:layout_alignParentEnd="true"
         android:background="@color/colorAccent"
         tools:src="@tools:sample/avatars"
+        android:padding="@dimen/_15sdp"
         tools:srcCompat="@drawable/ic_undo" />
 
     <Button
