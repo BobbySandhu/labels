@@ -2,13 +2,17 @@ package com.labels.ui.adapters
 
 import android.Manifest
 import android.content.Context
+import android.media.MediaRecorder
 import android.os.Build
+import android.os.Environment
 import android.text.TextUtils
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.RadioButton
+import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.labels.R
@@ -19,9 +23,13 @@ import kotlinx.android.synthetic.main.item_task_audio.view.*
 import kotlinx.android.synthetic.main.item_task_image.view.*
 import kotlinx.android.synthetic.main.item_task_mcq_checkbox.view.*
 import kotlinx.android.synthetic.main.item_task_mcq_radio.view.*
+import java.io.IOException
 
 class TaskDetailAdapter(val taskDetail: ArrayList<TaskDetailResponse>)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private val permissions = arrayOf(Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO)
 
     private lateinit var context: Context
     private lateinit var imageCaptureListener: ImageCaptureListener
@@ -29,8 +37,11 @@ class TaskDetailAdapter(val taskDetail: ArrayList<TaskDetailResponse>)
     private val mandatoryQuestion: HashMap<Int, Boolean> = HashMap()
     private val imagesHashMap: HashMap<Int, ArrayList<String>> = HashMap()
 
-    private val permissions = arrayOf(Manifest.permission.CAMERA,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    // Audio
+    private var output: String? = null
+    private var mediaRecorder: MediaRecorder? = null
+    private var state: Boolean = false
+    private var recordingStopped: Boolean = false
 
     companion object {
         const val TYPE_IMAGE = "image"
@@ -112,10 +123,64 @@ class TaskDetailAdapter(val taskDetail: ArrayList<TaskDetailResponse>)
 
     inner class AudioHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
+        private var buttonRecord = itemView.fab_record
+
         val question = itemView.text_audio_question
 
         fun setData(taskDetail: TaskDetailResponse, position: Int) {
             question.text = taskDetail.question
+
+            buttonRecord.setOnTouchListener { view: View, motionEvent: MotionEvent ->
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                    checkAudioPermission(position, motionEvent)
+                else recordAudio(motionEvent)
+
+                false
+            }
+        }
+
+        private fun recordAudio(motionEvent: MotionEvent) {
+            output = Environment.getExternalStorageDirectory().absolutePath + "/recording.mp3"
+            mediaRecorder = MediaRecorder()
+
+            mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
+            mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
+            mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            mediaRecorder?.setOutputFile(output)
+
+            when (motionEvent.action) {
+                MotionEvent.ACTION_DOWN -> startRecording()
+                MotionEvent.ACTION_UP -> stopRecording()
+            }
+        }
+
+        private fun startRecording() {
+            try {
+                mediaRecorder?.prepare()
+                mediaRecorder?.start()
+                state = true
+                Toast.makeText(context, "Recording started!", Toast.LENGTH_SHORT).show()
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+
+        private fun stopRecording() {
+            if (state) {
+                mediaRecorder?.stop()
+                mediaRecorder?.release()
+                state = false
+            } else {
+                Toast.makeText(context, "You are not recording right now!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        private fun checkAudioPermission(position: Int, motionEvent: MotionEvent) {
+            if (Utils.hasPermissions(context as TaskDetailsActivity, permissions))
+                recordAudio(motionEvent)
+            else Utils.requestPermissions(context as TaskDetailsActivity, permissions)
         }
     }
 
