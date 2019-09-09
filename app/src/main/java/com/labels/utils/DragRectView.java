@@ -11,7 +11,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -20,8 +19,6 @@ import androidx.appcompat.widget.AppCompatImageView;
 import com.labels.ui.activity.EditImageActivity;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class DragRectView extends AppCompatImageView implements View.OnTouchListener, EditImageActivity.UndoListener {
 
@@ -31,11 +28,11 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
     private Paint mRectPaint;
     private Matrix matrix;
     private ArrayList<Point> points = new ArrayList<>();
-    private ArrayList<Rect> rects = new ArrayList();
 
     private Path mPath;
     private ArrayList<Path> paths = new ArrayList<>();
     private ArrayList<Path> undonePaths = new ArrayList<>();
+    private Bitmap bitmap;
 
     public DragRectView(final Context context) {
         super(context);
@@ -61,6 +58,9 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
             touchY = (int) getPointerCoords(event)[1];
             point.set(touchX, touchY);
             points.add(point);
+
+            undonePaths.clear(); // Can be used to implement Redo functionality
+            mPath.reset();
         }
 
         if (points.size() != 0 && points.size() == 2) {
@@ -70,7 +70,13 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
             int xe = points.get(1).x;
             int ye = points.get(1).y;
 
-            rects.add(new Rect(xs, ys, xe, ye));
+            /* Adding path (different rectangles) */
+            Rect rect = new Rect(xs, ys, xe, ye);
+            RectF rectF = new RectF(rect);
+            mPath.addRect(rectF, Path.Direction.CW);
+            paths.add(mPath);
+            mPath = new Path();
+
             points.clear();
         }
 
@@ -82,16 +88,25 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
         drawRectangle();
+    }
+
+    private void drawRectangle() {
+        for (Path p : paths) {
+            canvas.drawPath(p, mRectPaint);
+        }
     }
 
     @Override
     public void onUndo() {
+        if (bitmap == null) return;
+
+        canvas.drawBitmap(bitmap, matrix, mRectPaint);
         if (paths.size() > 0) {
             undonePaths.add(paths.remove(paths.size() - 1));
             invalidate();
         }
+        invalidate();
     }
 
     public void setNewImage(Bitmap alteredBitmap, Bitmap bmp) {
@@ -104,17 +119,8 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
         canvas.drawBitmap(bmp, matrix, mRectPaint);
         mPath = new Path();
 
+        bitmap = bmp;
         setImageBitmap(alteredBitmap);
-    }
-
-    private void drawRectangle() {
-//        for (int i = 0; i < rects.size(); i++) {
-//            canvas.drawRect(rects.get(i), mRectPaint);
-//        }
-
-        /* Drawing only recently added rectangle */
-        if (!rects.isEmpty())
-            canvas.drawRect(rects.get(rects.size() - 1), mRectPaint);
     }
 
     final float[] getPointerCoords(MotionEvent e) {
