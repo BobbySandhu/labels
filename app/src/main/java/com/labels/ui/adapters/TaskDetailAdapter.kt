@@ -4,8 +4,10 @@ import android.Manifest
 import android.content.Context
 import android.media.MediaRecorder
 import android.os.Build
+import android.os.CountDownTimer
 import android.os.Environment
 import android.text.TextUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -24,6 +26,10 @@ import kotlinx.android.synthetic.main.item_task_image.view.*
 import kotlinx.android.synthetic.main.item_task_mcq_checkbox.view.*
 import kotlinx.android.synthetic.main.item_task_mcq_radio.view.*
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class TaskDetailAdapter(val taskDetail: ArrayList<TaskDetailResponse>)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -40,8 +46,6 @@ class TaskDetailAdapter(val taskDetail: ArrayList<TaskDetailResponse>)
     // Audio
     private var output: String? = null
     private var mediaRecorder: MediaRecorder? = null
-    private var state: Boolean = false
-    private var recordingStopped: Boolean = false
 
     companion object {
         const val TYPE_IMAGE = "image"
@@ -126,6 +130,7 @@ class TaskDetailAdapter(val taskDetail: ArrayList<TaskDetailResponse>)
         private var buttonRecord = itemView.fab_record
 
         val question = itemView.text_audio_question
+        val recordingTime = itemView.text_recording_time
 
         fun setData(taskDetail: TaskDetailResponse, position: Int) {
             question.text = taskDetail.question
@@ -140,13 +145,8 @@ class TaskDetailAdapter(val taskDetail: ArrayList<TaskDetailResponse>)
         }
 
         private fun recordAudio(motionEvent: MotionEvent) {
-            output = Environment.getExternalStorageDirectory().absolutePath + "/recording.mp3"
-            mediaRecorder = MediaRecorder()
-
-            mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
-            mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
-            mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            mediaRecorder?.setOutputFile(output)
+            val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+            output = Environment.getExternalStorageDirectory().absolutePath + "/RECORDING_$timeStamp.aac" //TODO rename each recording with unique name
 
             when (motionEvent.action) {
                 MotionEvent.ACTION_DOWN -> startRecording()
@@ -155,26 +155,36 @@ class TaskDetailAdapter(val taskDetail: ArrayList<TaskDetailResponse>)
         }
 
         private fun startRecording() {
-            try {
-                mediaRecorder?.prepare()
-                mediaRecorder?.start()
-                state = true
-                Toast.makeText(context, "Recording started!", Toast.LENGTH_SHORT).show()
-            } catch (e: IllegalStateException) {
-                e.printStackTrace()
-            } catch (e: IOException) {
-                e.printStackTrace()
+
+            mediaRecorder = MediaRecorder().apply {
+                setAudioSource(MediaRecorder.AudioSource.MIC)
+                setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
+                setOutputFile(output)
+                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+
+                recordingTime.stop()
+
+                try {
+                    prepare()
+                    Toast.makeText(context, "Recording started!", Toast.LENGTH_SHORT).show()
+                } catch (e: IOException) {
+                    Log.e("labels", "prepare() failed")
+                }
+
+                start()
+                recordingTime.start()
             }
         }
 
         private fun stopRecording() {
-            if (state) {
-                mediaRecorder?.stop()
-                mediaRecorder?.release()
-                state = false
-            } else {
-                Toast.makeText(context, "You are not recording right now!", Toast.LENGTH_SHORT).show()
+
+            mediaRecorder?.apply {
+                stop()
+                release()
+                Toast.makeText(context, "Recording finished!", Toast.LENGTH_SHORT).show()
             }
+            mediaRecorder = null
+            recordingTime.stop()
         }
 
         private fun checkAudioPermission(position: Int, motionEvent: MotionEvent) {

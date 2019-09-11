@@ -28,9 +28,9 @@
             android:id="@+id/image_ic_record"
             android:layout_width="@dimen/_25sdp"
             android:layout_height="@dimen/_25ssp"
-            app:layout_constraintBottom_toBottomOf="@+id/text_recording_name"
+            app:layout_constraintBottom_toBottomOf="@+id/text_recording_time"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/text_recording_name"
+            app:layout_constraintTop_toTopOf="@+id/text_recording_time"
             app:srcCompat="@drawable/ic_record"
             tools:srcCompat="@drawable/ic_record" />
 
@@ -50,26 +50,14 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/text_audio_question" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_stop"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/_5sdp"
-            android:layout_marginBottom="@dimen/_5sdp"
-            android:backgroundTint="@color/colorWhite"
-            android:src="@drawable/ic_stop"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/text_recording_name"
+        <Chronometer
+            android:id="@+id/text_recording_time"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_below="@id/text_audio_question"
             android:layout_gravity="center_horizontal"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="@dimen/_5sdp"
-            android:text="00:00"
             android:textSize="@dimen/_20ssp"
             app:layout_constraintBottom_toBottomOf="@+id/fab_record"
             app:layout_constraintEnd_toStartOf="@+id/fab_record"
