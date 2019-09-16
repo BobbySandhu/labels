@@ -75,7 +75,7 @@ class EditImageActivity : AppCompatActivity() {
         button_upload.setOnClickListener {
             if (alteredBitmap != null && imageFileUri == null) {
                 val contentValues = ContentValues(3)
-                contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, "Draw here")
+                contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, "labels-image")
 
                 imageFileUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 
