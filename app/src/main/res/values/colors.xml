@@ -4,4 +4,75 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
     <color name="colorWhite">#ffffff</color>
+
+    <color name="red">#FF0000</color>
+    <color name="orange">#FF7F00</color>
+    <color name="yellow">#FFFF00</color>
+    <color name="cyan">#00FFFF</color>
+    <color name="azure">#007FFF</color>
+    <color name="blue">#0000FF</color>
+    <color name="magenta">#FF00FF</color>
+
+    <color name="Orange">#FFA500</color>
+    <color name="OrangeRed">#FF4500</color>
+    <color name="Salmon">#FA8072</color>
+    <color name="Azure">#F0FFFF</color>
+    <color name="LightCoral">#F08080</color>
+    <color name="PaleGoldenrod">#EEE8AA</color>
+    <color name="Plum">#DDA0DD</color>
+    <color name="Gainsboro">#DCDCDC</color>
+    <color name="Crimson">#DC143C</color>
+    <color name="PaleVioletRed">#DB7093</color>
+    <color name="Goldenrod">#DAA520</color>
+    <color name="Orchid">#DA70D6</color>
+    <color name="Thistle">#D8BFD8</color>
+    <color name="MediumVioletRed">#C71585</color>
+    <color name="Silver">#C0C0C0</color>
+    <color name="DarkKhaki">#BDB76B</color>
+    <color name="RosyBrown">#BC8F8F</color>
+    <color name="MediumOrchid">#BA55D3</color>
+    <color name="DarkGoldenrod">#B8860B</color>
+    <color name="FireBrick">#B22222</color>
+    <color name="Sienna">#A0522D</color>
+    <color name="DarkTurquoise">#00CED1</color>
+    <color name="Green">#008000</color>
+    <color name="DarkGreen">#006400</color>
+    <color name="Blue">#0000FF</color>
+    <color name="DarkBlue">#00008B</color>
+
+    <array name="rainbow">
+        <item>@color/red</item>
+        <item>@color/orange</item>
+        <item>@color/yellow</item>
+        <item>@color/cyan</item>
+        <item>@color/azure</item>
+        <item>@color/blue</item>
+        <item>@color/magenta</item>
+        <item>@color/Orange</item>
+        <item>@color/OrangeRed</item>
+        <item>@color/Salmon</item>
+        <item>@color/Azure</item>
+        <item>@color/LightCoral</item>
+        <item>@color/PaleGoldenrod</item>
+        <item>@color/Plum</item>
+        <item>@color/Gainsboro</item>
+        <item>@color/Crimson</item>
+        <item>@color/PaleVioletRed</item>
+        <item>@color/Goldenrod</item>
+        <item>@color/Orchid</item>
+        <item>@color/Thistle</item>
+        <item>@color/MediumVioletRed</item>
+        <item>@color/Silver</item>
+        <item>@color/DarkKhaki</item>
+        <item>@color/RosyBrown</item>
+        <item>@color/MediumOrchid</item>
+        <item>@color/DarkGoldenrod</item>
+        <item>@color/FireBrick</item>
+        <item>@color/Sienna</item>
+        <item>@color/DarkTurquoise</item>
+        <item>@color/Green</item>
+        <item>@color/DarkGreen</item>
+        <item>@color/Blue</item>
+        <item>@color/DarkBlue</item>
+    </array>
 </resources>

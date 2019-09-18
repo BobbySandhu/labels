@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import androidx.appcompat.widget.AppCompatImageView;
+import com.labels.R;
 import com.labels.ui.activity.EditImageActivity;
 
 import java.util.ArrayList;
@@ -26,6 +27,10 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
     private Bitmap bitmap;
     private boolean isMoving = false;
     private int rectPosition = -1;
+    private int[] rainbow;
+    private int colorArraySize = 0;
+    private int colorIndex = 0;
+    private NewMarkingListener newMarkingListener;
 
     public DragRectView(final Context context) {
         super(context);
@@ -113,16 +118,20 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         drawRectangle();
-//        for (Rect p : rects) {
-//            canvas.drawRect(Math.min(p.left, p.right), Math.min(p.top, p.bottom),
-//                    Math.max(p.right, p.left), Math.max(p.bottom, p.top), mRectPaint);
-//        }
     }
 
     private void drawRectangle() {
-        for (Rect p : rects) {
-            canvas.drawRect(p, mRectPaint);
+
+        for (int i = 0; i < rects.size(); i++) {
+            if (colorIndex > colorArraySize - 1) colorIndex = 0;
+
+            mRectPaint.setColor(rainbow[colorIndex]);
+            canvas.drawRect(rects.get(i), mRectPaint);
+            colorIndex++;
         }
+
+        colorIndex = 0;
+        //newMarkingListener.onNewMarking(rects.size());
     }
 
     @Override
@@ -138,19 +147,21 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
         invalidate();
     }
 
-    public void setNewImage(Bitmap alteredBitmap, Bitmap bmp) {
+    public void setNewImage(Context context, Bitmap alteredBitmap, Bitmap bmp) {
         canvas = new Canvas(alteredBitmap);
         mRectPaint = new Paint();
-        mRectPaint.setColor(Color.RED);
         mRectPaint.setStrokeWidth(5);
         mRectPaint.setStyle(Paint.Style.STROKE);
         matrix = new Matrix();
-        //canvas.drawBitmap(bmp, matrix, mRectPaint);
-        canvas.drawBitmap(bmp, 0, 0, mRectPaint);
+        canvas.drawBitmap(bmp, matrix, mRectPaint);
+        //canvas.drawBitmap(bmp, 0, 0, mRectPaint);
         mPath = new Path();
 
         bitmap = bmp;
         setImageBitmap(alteredBitmap);
+
+        rainbow = context.getResources().getIntArray(R.array.rainbow);
+        colorArraySize = rainbow.length;
     }
 
     public DragRectView getInstance() {
@@ -166,5 +177,9 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
         matrix.mapPoints(coords);
 
         return coords;
+    }
+
+    public interface NewMarkingListener {
+        void onNewMarking(int totalMarkings);
     }
 }

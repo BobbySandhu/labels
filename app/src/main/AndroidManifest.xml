@@ -26,8 +26,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths">
-            </meta-data>
+                android:resource="@xml/file_paths"></meta-data>
         </provider>
 
         <!--<activity
@@ -58,7 +57,9 @@
             android:name=".MainActivity"
             android:theme="@style/AppThemeNoActionBar" />-->
         <activity android:name=".ui.activity.TaskDetailsActivity" />
-        <activity android:name=".ui.activity.EditImageActivity" />
+        <activity
+            android:name=".ui.activity.EditImageActivity"
+            android:theme="@style/AppThemeFullScreen" />
     </application>
 
 </manifest>

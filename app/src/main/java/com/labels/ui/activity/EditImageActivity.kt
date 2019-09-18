@@ -64,7 +64,7 @@ class EditImageActivity : AppCompatActivity() {
             alteredBitmap = Utils.getResizedBitmap(bmp, imageResolution)
             bmp = Utils.getResizedBitmap(bmp, imageResolution)
 
-            image_edit.setNewImage(alteredBitmap, bmp)
+            image_edit.setNewImage(this, alteredBitmap, bmp)
             mUndoListener = image_edit.instance
         } catch (e: Exception) {
             e.printStackTrace()
