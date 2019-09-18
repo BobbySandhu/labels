@@ -1,17 +1,28 @@
 package com.labels.utils;
 
 import android.content.Context;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+
 import androidx.appcompat.widget.AppCompatImageView;
+
 import com.labels.R;
-import com.labels.ui.activity.EditImageActivity;
+import com.labels.interfaces.MarkingListener;
+import com.labels.interfaces.UndoListener;
+import com.labels.model.MarkingRect;
 
 import java.util.ArrayList;
 
-public class DragRectView extends AppCompatImageView implements View.OnTouchListener, EditImageActivity.UndoListener {
+public class DragRectView extends AppCompatImageView implements View.OnTouchListener, UndoListener {
 
     private int touchX;
     private int touchY;
@@ -19,18 +30,16 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
     private Paint mRectPaint;
     private Matrix matrix;
     private ArrayList<Point> points = new ArrayList<>();
-    private ArrayList<Rect> rects = new ArrayList<>();
+    private ArrayList<MarkingRect> rects = new ArrayList<>();
 
     private Path mPath;
     private ArrayList<Path> paths = new ArrayList<>();
     private ArrayList<Path> undonePaths = new ArrayList<>();
     private Bitmap bitmap;
-    private boolean isMoving = false;
-    private int rectPosition = -1;
     private int[] rainbow;
     private int colorArraySize = 0;
     private int colorIndex = 0;
-    private NewMarkingListener newMarkingListener;
+    private MarkingListener markingListener;
 
     public DragRectView(final Context context) {
         super(context);
@@ -60,12 +69,6 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
                 point.set(touchX, touchY);
                 points.add(point);
 
-                for (int i =0; i< rects.size(); i++) {
-                    if (rects.get(i).contains(touchX, touchY)) {
-                        rectPosition = i;
-                    }
-                }
-
                 undonePaths.clear(); // Can be used to implement Redo functionality
                 mPath.reset();
 
@@ -80,7 +83,14 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
                     Rect rect = new Rect(xs, ys, xe, ye);
                     RectF rectF = new RectF(rect);
                     mPath.addRect(rectF, Path.Direction.CW);
-                    paths.add(mPath); rects.add(rect);
+                    paths.add(mPath);
+
+                    /* Saving rectangle with its color value */
+                    if (colorIndex > colorArraySize - 1) colorIndex = 0;
+                    rects.add(0, new MarkingRect(rect, rainbow[colorIndex]));
+                    markingListener.onMarking(rects, 0);
+                    colorIndex++;
+
                     mPath = new Path();
 
                     points.clear();
@@ -121,33 +131,30 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
     }
 
     private void drawRectangle() {
-
         for (int i = 0; i < rects.size(); i++) {
-            if (colorIndex > colorArraySize - 1) colorIndex = 0;
-
-            mRectPaint.setColor(rainbow[colorIndex]);
-            canvas.drawRect(rects.get(i), mRectPaint);
-            colorIndex++;
+            mRectPaint.setColor(rects.get(i).getRectColor());
+            canvas.drawRect(rects.get(i).getRect(), mRectPaint);
         }
-
-        colorIndex = 0;
-        //newMarkingListener.onNewMarking(rects.size());
     }
 
     @Override
-    public void onUndo() {
+    public void onUndo(int position) {
         if (bitmap == null) return;
 
         canvas.drawBitmap(bitmap, matrix, mRectPaint);
 
         if (rects.size() > 0) {
-            rects.remove(rects.size() - 1);
+            rects.remove(position);
+            //rects.remove(rects.size() - 1);
+            markingListener.onMarking(rects, position);
+            if (colorIndex != 0) colorIndex--;
             invalidate();
         }
         invalidate();
     }
 
     public void setNewImage(Context context, Bitmap alteredBitmap, Bitmap bmp) {
+        markingListener = (MarkingListener) context;
         canvas = new Canvas(alteredBitmap);
         mRectPaint = new Paint();
         mRectPaint.setStrokeWidth(5);
@@ -177,9 +184,5 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
         matrix.mapPoints(coords);
 
         return coords;
-    }
-
-    public interface NewMarkingListener {
-        void onNewMarking(int totalMarkings);
     }
 }

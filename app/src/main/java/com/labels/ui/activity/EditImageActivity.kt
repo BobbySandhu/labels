@@ -7,15 +7,33 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.labels.R
+import com.labels.interfaces.MarkingListener
+import com.labels.interfaces.UndoListener
+import com.labels.model.MarkingRect
+import com.labels.ui.adapters.RecyclerBoxesAdapter
 import com.labels.utils.Constants
 import com.labels.utils.Utils
 import kotlinx.android.synthetic.main.activity_edit_image.*
 import java.io.File
+import java.util.*
+import kotlin.collections.ArrayList
 
-class EditImageActivity : AppCompatActivity() {
+class EditImageActivity : AppCompatActivity(), MarkingListener, RecyclerBoxesAdapter.RemoveMarkingListener {
+
+    override fun onRemove(position: Int) {
+        mUndoListener?.onUndo(position)
+        Toast.makeText(this, "Removed", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onMarking(markedRectsArray: ArrayList<MarkingRect>?) {
+        setMarkedRectAdapter(markedRectsArray)
+        Toast.makeText(this, "Marked noted", Toast.LENGTH_SHORT).show()
+    }
 
     private lateinit var imagePath: String
     private var bmp: Bitmap? = null
@@ -38,6 +56,15 @@ class EditImageActivity : AppCompatActivity() {
         displayImageToEdit()
     }
 
+    private fun setMarkedRectAdapter(markedRectsArray: ArrayList<MarkingRect>?) {
+        if (markedRectsArray != null) {
+            val recyclerBoxesAdapter = markedRectsArray?.let { RecyclerBoxesAdapter(it) }
+            var layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+            recycler_boxes.layoutManager = layoutManager
+            recycler_boxes.scrollToPosition(markedRectsArray.size - 1)
+            recycler_boxes.adapter = recyclerBoxesAdapter
+        }
+    }
 
     private fun displayImageToEdit() {
         try {
@@ -72,7 +99,7 @@ class EditImageActivity : AppCompatActivity() {
     }
 
     private fun setSaveButtonListener() {
-        button_upload.setOnClickListener {
+        image_save.setOnClickListener {
             if (alteredBitmap != null && imageFileUri == null) {
                 val contentValues = ContentValues(3)
                 contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, "labels-image")
@@ -102,11 +129,7 @@ class EditImageActivity : AppCompatActivity() {
 
     private fun setUndoButtonListener() {
         image_undo.setOnClickListener {
-            mUndoListener?.onUndo()
+            //mUndoListener?.onUndo()
         }
-    }
-
-    interface UndoListener {
-        fun onUndo()
     }
 }
