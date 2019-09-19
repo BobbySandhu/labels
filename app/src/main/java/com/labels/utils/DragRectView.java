@@ -10,6 +10,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -40,6 +41,7 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
     private int colorArraySize = 0;
     private int colorIndex = 0;
     private MarkingListener markingListener;
+    private int selectedRectPosition = -1;
 
     public DragRectView(final Context context) {
         super(context);
@@ -67,55 +69,85 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
                 touchY = (int) getPointerCoords(event)[1];
 
                 point.set(touchX, touchY);
-                points.add(point);
 
-                undonePaths.clear(); // Can be used to implement Redo functionality
+                // Check if click is inside any existing rectangle
+                for (int i = 0; i < rects.size(); i++) {
+                    Rect rect = rects.get(i).getRect();
+                    if (touchX > rect.left && touchX < rect.right && touchY < rect.bottom && touchY > rect.top) {
+                        selectedRectPosition = i;
+                        Log.d("rect points CENTERCLICK", "clicked inside");
+                    }
+                }
+
+                if (selectedRectPosition == -1)
+                    points.add(point);
+
+                Log.d("rect points POSITION", "" + selectedRectPosition);
+
                 mPath.reset();
 
-                if (points.size() != 0 && points.size() == 2) {
+                if (selectedRectPosition == -1) {
 
-                    int xs = points.get(0).x;
-                    int ys = points.get(0).y;
-                    int xe = points.get(1).x;
-                    int ye = points.get(1).y;
+                    if (points.size() != 0 && points.size() == 2) {
 
-                    /* Adding path (different rectangles) */
-                    Rect rect = new Rect(xs, ys, xe, ye);
-                    RectF rectF = new RectF(rect);
-                    mPath.addRect(rectF, Path.Direction.CW);
-                    paths.add(mPath);
+                        int xs = points.get(0).x;
+                        int ys = points.get(0).y;
+                        int xe = points.get(1).x;
+                        int ye = points.get(1).y;
 
-                    /* Saving rectangle with its color value */
-                    if (colorIndex > colorArraySize - 1) colorIndex = 0;
-                    rects.add(0, new MarkingRect(rect, rainbow[colorIndex]));
-                    markingListener.onMarking(rects, 0);
-                    colorIndex++;
+                        /* Adding path (different rectangles) */
+                        Rect rect = new Rect(xs, ys, xe, ye);
+                        RectF rectF = new RectF(rect);
+                        mPath.addRect(rectF, Path.Direction.CW);
+                        paths.add(mPath);
 
-                    mPath = new Path();
+                        /* Saving rectangle with its color value */
+                        if (colorIndex > colorArraySize - 1) colorIndex = 0;
+                        rects.add(new MarkingRect(rect, rainbow[colorIndex]));
+                        markingListener.onMarking(rects);
+                        colorIndex++;
 
-                    points.clear();
+                        mPath = new Path();
+
+                        points.clear();
+                    }
                 }
+
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                /*int x = (int) event.getX();
+                int x = (int) event.getX();
                 int y = (int) event.getY();
 
                 int diffX = x - touchX;
                 int diffY = y - touchY;
 
-                if (diffX > 5 && diffY > 5 && rects.size() > 0) {
-                    rects.get(rectPosition).left = rects.get(rectPosition).left + diffX;
-                    rects.get(rectPosition).top = rects.get(rectPosition).top + diffY;
-                    rects.get(rectPosition).right = rects.get(rectPosition).right + diffX;
-                    rects.get(rectPosition).bottom = rects.get(rectPosition).bottom + diffY;
-                }
+                Log.d("rect points CHANGE", ""+x);
+                Log.d("rect points CHANGE", ""+y);
 
-                invalidate();*/
+                if (selectedRectPosition != -1) {
+
+                    if (diffX > 5 && diffY > 5 && rects.size() > 0) {
+                        rects.get(selectedRectPosition).getRect().left = rects.get(selectedRectPosition).getRect().left + diffX;
+                        rects.get(selectedRectPosition).getRect().top = rects.get(selectedRectPosition).getRect().top + diffY;
+                        rects.get(selectedRectPosition).getRect().right = rects.get(selectedRectPosition).getRect().right + diffX;
+                        rects.get(selectedRectPosition).getRect().bottom = rects.get(selectedRectPosition).getRect().bottom + diffY;
+
+                        Log.d("rect points LEFT", "" + rects.get(selectedRectPosition).getRect().left);
+                        Log.d("rect points TOP", "" + rects.get(selectedRectPosition).getRect().top);
+                        Log.d("rect points RIGHT", "" + rects.get(selectedRectPosition).getRect().right);
+                        Log.d("rect points BOTTOM", "" + rects.get(selectedRectPosition).getRect().bottom);
+                    }
+
+                    invalidate();
+
+                    touchX = x;
+                    touchY = y;
+                }
 
                 break;
             case MotionEvent.ACTION_UP:
-
+                selectedRectPosition = -1;
                 break;
         }
 
@@ -135,6 +167,8 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
             mRectPaint.setColor(rects.get(i).getRectColor());
             canvas.drawRect(rects.get(i).getRect(), mRectPaint);
         }
+
+        if (rects.size() == 0) selectedRectPosition = -1;
     }
 
     @Override
@@ -146,7 +180,7 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
         if (rects.size() > 0) {
             rects.remove(position);
             //rects.remove(rects.size() - 1);
-            markingListener.onMarking(rects, position);
+            markingListener.onMarking(rects);
             if (colorIndex != 0) colorIndex--;
             invalidate();
         }
