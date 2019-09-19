@@ -5,12 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -25,23 +22,21 @@ import java.util.ArrayList;
 
 public class DragRectView extends AppCompatImageView implements View.OnTouchListener, UndoListener {
 
+    private int[] mColors;
     private int touchX;
     private int touchY;
-    private Canvas canvas;
-    private Paint mRectPaint;
-    private Matrix matrix;
-    private ArrayList<Point> points = new ArrayList<>();
-    private ArrayList<MarkingRect> rects = new ArrayList<>();
+    private int mColorArraySize = 0;
+    private int mCurrentColorIndex = 0;
+    private int mSelectedRectPosition = -1;
 
-    private Path mPath;
-    private ArrayList<Path> paths = new ArrayList<>();
-    private ArrayList<Path> undonePaths = new ArrayList<>();
-    private Bitmap bitmap;
-    private int[] rainbow;
-    private int colorArraySize = 0;
-    private int colorIndex = 0;
-    private MarkingListener markingListener;
-    private int selectedRectPosition = -1;
+    private Canvas mCanvas;
+    private Paint mRectPaint;
+    private Matrix mMatrix;
+    private ArrayList<Point> mTouchPoints = new ArrayList<>();
+    private ArrayList<MarkingRect> mRects = new ArrayList<>();
+
+    private Bitmap mBitmap;
+    private MarkingListener mMarkingListener;
 
     public DragRectView(final Context context) {
         super(context);
@@ -71,73 +66,60 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
                 point.set(touchX, touchY);
 
                 // Check if click is inside any existing rectangle
-                for (int i = 0; i < rects.size(); i++) {
-                    Rect rect = rects.get(i).getRect();
+                for (int i = 0; i < mRects.size(); i++) {
+                    Rect rect = mRects.get(i).getRect();
                     if (touchX > rect.left && touchX < rect.right && touchY < rect.bottom && touchY > rect.top) {
-                        selectedRectPosition = i;
-                        Log.d("rect points CENTERCLICK", "clicked inside");
+                        mSelectedRectPosition = i;
                     }
                 }
 
-                if (selectedRectPosition == -1)
-                    points.add(point);
+                if (mSelectedRectPosition == -1)
+                    mTouchPoints.add(point);
 
-                Log.d("rect points POSITION", "" + selectedRectPosition);
+                if (mSelectedRectPosition == -1) {
 
-                mPath.reset();
+                    if (mTouchPoints.size() != 0 && mTouchPoints.size() == 2) {
 
-                if (selectedRectPosition == -1) {
+                        int xs = mTouchPoints.get(0).x;
+                        int ys = mTouchPoints.get(0).y;
+                        int xe = mTouchPoints.get(1).x;
+                        int ye = mTouchPoints.get(1).y;
 
-                    if (points.size() != 0 && points.size() == 2) {
-
-                        int xs = points.get(0).x;
-                        int ys = points.get(0).y;
-                        int xe = points.get(1).x;
-                        int ye = points.get(1).y;
-
-                        /* Adding path (different rectangles) */
+                        /* Creating - Saving rectangle with its color value */
                         Rect rect = new Rect(xs, ys, xe, ye);
-                        RectF rectF = new RectF(rect);
-                        mPath.addRect(rectF, Path.Direction.CW);
-                        paths.add(mPath);
 
-                        /* Saving rectangle with its color value */
-                        if (colorIndex > colorArraySize - 1) colorIndex = 0;
-                        rects.add(new MarkingRect(rect, rainbow[colorIndex]));
-                        markingListener.onMarking(rects);
-                        colorIndex++;
+                        if (mCurrentColorIndex > mColorArraySize - 1) mCurrentColorIndex = 0;
 
-                        mPath = new Path();
+                        mRects.add(new MarkingRect(rect, mColors[mCurrentColorIndex]));
+                        mMarkingListener.onMarking(mRects);
+                        mCurrentColorIndex++;
 
-                        points.clear();
+                        mTouchPoints.clear();
+                        invalidate();
                     }
                 }
 
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                int x = (int) event.getX();
-                int y = (int) event.getY();
 
-                int diffX = x - touchX;
-                int diffY = y - touchY;
+                int x = (int) getPointerCoords(event)[0];
+                int y = (int) getPointerCoords(event)[1];
 
-                Log.d("rect points CHANGE", ""+x);
-                Log.d("rect points CHANGE", ""+y);
+                final int distY = Math.abs(y - touchY);
+                final int distX = Math.abs(x - touchX);
 
-                if (selectedRectPosition != -1) {
+                int deltaX = x - touchX;
+                int deltaY = y - touchY;
 
-                    if (diffX > 5 && diffY > 5 && rects.size() > 0) {
-                        rects.get(selectedRectPosition).getRect().left = rects.get(selectedRectPosition).getRect().left + diffX;
-                        rects.get(selectedRectPosition).getRect().top = rects.get(selectedRectPosition).getRect().top + diffY;
-                        rects.get(selectedRectPosition).getRect().right = rects.get(selectedRectPosition).getRect().right + diffX;
-                        rects.get(selectedRectPosition).getRect().bottom = rects.get(selectedRectPosition).getRect().bottom + diffY;
+                if (mSelectedRectPosition != -1) {
 
-                        Log.d("rect points LEFT", "" + rects.get(selectedRectPosition).getRect().left);
-                        Log.d("rect points TOP", "" + rects.get(selectedRectPosition).getRect().top);
-                        Log.d("rect points RIGHT", "" + rects.get(selectedRectPosition).getRect().right);
-                        Log.d("rect points BOTTOM", "" + rects.get(selectedRectPosition).getRect().bottom);
-                    }
+                    mCanvas.drawBitmap(mBitmap, mMatrix, mRectPaint);
+
+                    mRects.get(mSelectedRectPosition).getRect().left = mRects.get(mSelectedRectPosition).getRect().left + deltaX;
+                    mRects.get(mSelectedRectPosition).getRect().top = mRects.get(mSelectedRectPosition).getRect().top + deltaY;
+                    mRects.get(mSelectedRectPosition).getRect().right = mRects.get(mSelectedRectPosition).getRect().right + deltaX;
+                    mRects.get(mSelectedRectPosition).getRect().bottom = mRects.get(mSelectedRectPosition).getRect().bottom + deltaY;
 
                     invalidate();
 
@@ -147,11 +129,10 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
 
                 break;
             case MotionEvent.ACTION_UP:
-                selectedRectPosition = -1;
+                mSelectedRectPosition = -1;
+                invalidate();
                 break;
         }
-
-        invalidate();
 
         return true;
     }
@@ -163,46 +144,45 @@ public class DragRectView extends AppCompatImageView implements View.OnTouchList
     }
 
     private void drawRectangle() {
-        for (int i = 0; i < rects.size(); i++) {
-            mRectPaint.setColor(rects.get(i).getRectColor());
-            canvas.drawRect(rects.get(i).getRect(), mRectPaint);
+        for (int i = 0; i < mRects.size(); i++) {
+            mRectPaint.setColor(mRects.get(i).getRectColor());
+            mCanvas.drawRect(mRects.get(i).getRect(), mRectPaint);
         }
 
-        if (rects.size() == 0) selectedRectPosition = -1;
+        if (mRects.size() == 0) mSelectedRectPosition = -1;
     }
 
     @Override
     public void onUndo(int position) {
-        if (bitmap == null) return;
+        if (mBitmap == null) return;
 
-        canvas.drawBitmap(bitmap, matrix, mRectPaint);
+        mCanvas.drawBitmap(mBitmap, mMatrix, mRectPaint);
 
-        if (rects.size() > 0) {
-            rects.remove(position);
-            //rects.remove(rects.size() - 1);
-            markingListener.onMarking(rects);
-            if (colorIndex != 0) colorIndex--;
+        if (mRects.size() > 0) {
+            mRects.remove(position);
+            mMarkingListener.onMarking(mRects);
+
+            if (mCurrentColorIndex != 0) mCurrentColorIndex--;
+
             invalidate();
         }
         invalidate();
     }
 
     public void setNewImage(Context context, Bitmap alteredBitmap, Bitmap bmp) {
-        markingListener = (MarkingListener) context;
-        canvas = new Canvas(alteredBitmap);
+        mMarkingListener = (MarkingListener) context;
+        mCanvas = new Canvas(alteredBitmap);
         mRectPaint = new Paint();
         mRectPaint.setStrokeWidth(5);
         mRectPaint.setStyle(Paint.Style.STROKE);
-        matrix = new Matrix();
-        canvas.drawBitmap(bmp, matrix, mRectPaint);
-        //canvas.drawBitmap(bmp, 0, 0, mRectPaint);
-        mPath = new Path();
+        mMatrix = new Matrix();
+        mCanvas.drawBitmap(bmp, mMatrix, mRectPaint);
 
-        bitmap = bmp;
+        mBitmap = bmp;
         setImageBitmap(alteredBitmap);
 
-        rainbow = context.getResources().getIntArray(R.array.rainbow);
-        colorArraySize = rainbow.length;
+        mColors = context.getResources().getIntArray(R.array.rainbow);
+        mColorArraySize = mColors.length;
     }
 
     public DragRectView getInstance() {
