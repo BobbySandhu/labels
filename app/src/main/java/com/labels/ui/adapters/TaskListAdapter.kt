@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.labels.R
 import com.labels.model.Task
-import com.labels.ui.fragments.detail.TaskDetailsActivity
+import com.labels.ui.activity.TaskDetailsActivity
 import kotlinx.android.synthetic.main.item_task.view.*
 
 class TaskListAdapter(val tasks: Task) : RecyclerView.Adapter<TaskListAdapter.MyViewHolder>() {

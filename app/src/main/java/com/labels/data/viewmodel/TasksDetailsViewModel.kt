@@ -14,4 +14,8 @@ class TasksDetailsViewModel(application: Application) : AndroidViewModel(applica
     fun getTasksDetails() : LiveData<ArrayList<TaskDetailResponse>> {
         return repository.getTaskDetail()
     }
+
+    fun sendAnswers(answerJson: String) : LiveData<String> {
+        return repository.sendAnswers(answerJson)
+    }
 }

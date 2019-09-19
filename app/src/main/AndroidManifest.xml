@@ -4,6 +4,10 @@
     package="com.labels">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:allowBackup="false"
@@ -12,9 +16,20 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.fragments.detail.TaskDetailsActivity"></activity>
-        <activity
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.labels.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
+
+        <!--<activity
             android:name=".ui.activity.SplashActivity"
             android:theme="@style/AppThemeFullScreen">
             <intent-filter>
@@ -22,13 +37,29 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>-->
+
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/AppThemeFullScreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
+
+
         <activity
             android:name=".ui.activity.IntroSliderActivity"
             android:theme="@style/AppThemeFullScreen" />
-        <activity
+        <!--<activity
             android:name=".MainActivity"
-            android:theme="@style/AppThemeNoActionBar" />
+            android:theme="@style/AppThemeNoActionBar" />-->
+        <activity android:name=".ui.activity.TaskDetailsActivity" />
+        <activity
+            android:name=".ui.activity.EditImageActivity"
+            android:theme="@style/AppThemeFullScreen" />
     </application>
 
 </manifest>

@@ -9,4 +9,5 @@
     <string name="heading_task_available">Tasks available for you</string>
     <string name="submit">Submit</string>
     <string name="title_task_detail">Your Task</string>
+    <string name="remove_marking">Remove marking</string>
 </resources>

@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card_task"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/_85sdp"
     android:layout_marginStart="@dimen/_1sdp"
-    android:layout_marginEnd="@dimen/_1sdp"
-    android:clickable="true"
-    android:focusable="true"
-    android:foreground="?android:attr/selectableItemBackground">
+    android:layout_marginEnd="@dimen/_1sdp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -21,35 +19,49 @@
             style="@style/TextHeading"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             tools:text="Which of these option true?" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_play"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/_20sdp"
-            android:layout_marginBottom="@dimen/_5sdp"
-            android:backgroundTint="@color/colorWhite"
-            android:src="@drawable/ic_play" />
+        <ImageView
+            android:id="@+id/image_ic_record"
+            android:layout_width="@dimen/_25sdp"
+            android:layout_height="@dimen/_25ssp"
+            app:layout_constraintBottom_toBottomOf="@+id/text_recording_time"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/text_recording_time"
+            app:srcCompat="@drawable/ic_record"
+            tools:srcCompat="@drawable/ic_record" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_stop"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/_5sdp"
+            android:id="@+id/fab_record"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_5sdp"
             android:layout_marginBottom="@dimen/_5sdp"
-            android:backgroundTint="@color/colorWhite"
-            android:src="@drawable/ic_stop"
-            android:visibility="gone" />
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/ic_mic"
+            app:backgroundTint="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_audio_question" />
 
-        <TextView
-            android:id="@+id/text_recording_naem"
-            android:layout_width="wrap_content"
+        <Chronometer
+            android:id="@+id/text_recording_time"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_below="@id/text_audio_question"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/_5sdp"
-            tools:text="Recording Number 1" />
-    </LinearLayout>
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="@dimen/_5sdp"
+            android:textSize="@dimen/_20ssp"
+            app:layout_constraintBottom_toBottomOf="@+id/fab_record"
+            app:layout_constraintEnd_toStartOf="@+id/fab_record"
+            app:layout_constraintStart_toEndOf="@+id/image_ic_record"
+            app:layout_constraintTop_toTopOf="@+id/fab_record" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
